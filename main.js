@@ -25,34 +25,48 @@ Testa la funzione con la query "london"
 Se l’array di ricerca è vuoto, invece di far fallire l'intera funzione, 
 semplicemente i dati relativi a quella chiamata verranno settati a null e  la frase relativa non viene stampata. 
 Testa la funzione con la query “vienna” (non trova il meteo).
+
+🎯 Bonus 2 - Chiamate fallite
+Attualmente, se una delle chiamate fallisce, **Promise.all()** rigetta l'intera operazione.
+
+Modifica `getDashboardData()` per usare **Promise.allSettled()**, in modo che:
+Se una chiamata fallisce, i dati relativi a quella chiamata verranno settati a null.
+Stampa in console un messaggio di errore per ogni richiesta fallita.
+Testa la funzione con un link fittizio per il meteo (es. https://www.meteofittizio.it).
 */
 
 const getDashboardData = async (query) => {
-    // using promise all to save in an array the responses of the api
-    const [destinationRes, weatherRes, airportRes] = await Promise.all([
+    // using promise allsettled to save in an array the responses of the api
+    const [destinationRes, weatherRes, airportRes] = await Promise.allSettled([
         fetch(`http://localhost:3333/destinations?search=${query}`),
-        fetch(`http://localhost:3333/weathers?search=${query}`),
+        fetch(`https://www.meteofittizio.it?search=${query}`),
         fetch(`http://localhost:3333/airports?search=${query}`),
     ])
-    // parsing the responses in json using a promise all
-    const [destinationData, weatherData, airportData] = await Promise.all([
-        destinationRes.json(),
-        weatherRes.json(),
-        airportRes.json(),
-    ])
+    // parsing the responses in json only if the status is fulfilled
+    const parseData = async (res) => {
+        if (res.status === 'fulfilled') {
+            const data = await res.value.json();
+            return data.length > 0 ? data[0] : null;
+        } else {
+            console.error(`Errore fetch`, res.reason);
+            return null;
+        }
+    };
     //creating object of destination weather and airport 
-    const destination = destinationData[0] || {}
-    const weather = weatherData[0] || {}
-    const airport = airportData[0] || {}
+    const destinationData = await parseData(destinationRes);
+    const weatherData = await parseData(weatherRes);
+    const airportData = await parseData(airportRes);
+
     //creating final object with the info required
     return {
-        city: (destination && destination.name) ? destination.name : null,
-        country: (destination && destination.country) ? destination.country : null,
-        temperature: (weather && weather.temperature) ? weather.temperature : null,
-        weather: (weather && weather.weather_description) ? weather.weather_description : null,
-        airport: (airport && airport.name) ? airport.name : null
-    }
+        city: destinationData && destinationData.name ? destinationData.name : null,
+        country: destinationData && destinationData.country ? destinationData.country : null,
+        temperature: weatherData && weatherData.temperature ? weatherData.temperature : null,
+        weather: weatherData && weatherData.weather_description ? weatherData.weather_description : null,
+        airport: airportData && airportData.name ? airportData.name : null,
+    };
 }
+
 //use example
 getDashboardData('vienna')
     .then(data => {
