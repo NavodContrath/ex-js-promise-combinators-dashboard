@@ -23,5 +23,21 @@ Testa la funzione con la query "london"
 */
 
 const getDashboardData = async (query) => {
-    const response = await fetch(`http://localhost:3333/destinations?search=${query}`)
+    const [destinationRes, weatherRes, airportRes] = await Promise.all([
+        fetch(`http://localhost:3333/destinations?search=${query}`),
+        fetch(`http://localhost:3333/weathers?search=${query}`),
+        fetch(`http://localhost:3333/airports?search=${query}`),
+    ])
+
+    const [destinationData, weatherData, airportData] = await Promise.all([
+        destinationRes.json(),
+        weatherRes.json(),
+        airportRes.json(),
+    ])
+
+
+    return {
+
+    }
 }
+
