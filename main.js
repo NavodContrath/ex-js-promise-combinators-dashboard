@@ -20,6 +20,11 @@ Utilizzare Promise.all() per eseguire più richieste in parallelo.
 Restituire una Promise che risolve un oggetto contenente i dati aggregati.
 Stampare i dati in console in un messaggio ben formattato.
 Testa la funzione con la query "london"
+
+🎯 Bonus 1 - Risultato vuoto
+Se l’array di ricerca è vuoto, invece di far fallire l'intera funzione, 
+semplicemente i dati relativi a quella chiamata verranno settati a null e  la frase relativa non viene stampata. 
+Testa la funzione con la query “vienna” (non trova il meteo).
 */
 
 const getDashboardData = async (query) => {
@@ -36,9 +41,9 @@ const getDashboardData = async (query) => {
         airportRes.json(),
     ])
     //creating object of destination weather and airport 
-    const destination = destinationData[0]
-    const weather = weatherData[0]
-    const airport = airportData[0]
+    const destination = destinationData[0] || {}
+    const weather = weatherData[0] || {}
+    const airport = airportData[0] || {}
     //creating final object with the info required
     return {
         city: destination.name,
@@ -49,7 +54,7 @@ const getDashboardData = async (query) => {
     }
 }
 //use example
-getDashboardData('london')
+getDashboardData('vienna')
     .then(data => {
         console.log('Dasboard data:', data);
         console.log(
