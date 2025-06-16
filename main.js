@@ -46,21 +46,29 @@ const getDashboardData = async (query) => {
     const airport = airportData[0] || {}
     //creating final object with the info required
     return {
-        city: destination.name,
-        country: destination.country,
-        temperature: weather.temperature,
-        weather: weather.weather_description,
-        airport: airport.name,
+        city: (destination && destination.name) ? destination.name : null,
+        country: (destination && destination.country) ? destination.country : null,
+        temperature: (weather && weather.temperature) ? weather.temperature : null,
+        weather: (weather && weather.weather_description) ? weather.weather_description : null,
+        airport: (airport && airport.name) ? airport.name : null
     }
 }
 //use example
 getDashboardData('vienna')
     .then(data => {
         console.log('Dasboard data:', data);
-        console.log(
-            `${data.city} is in ${data.country}.\n` +
-            `Today there are ${data.temperature} degrees and the weather is ${data.weather}.\n` +
-            `The main airport is ${data.airport}.\n`
-        );
+
+        let message = ``
+
+        if (data.city !== null && data.country !== null) {
+            message += `${data.city} is in ${data.country}.\n`
+        }
+        if (data.temperature !== null && data.weather !== null) {
+            message += `Today there are ${data.temperature} degrees and the weather is ${data.weather}.\n`
+        }
+        if (data.airport !== null) {
+            message += `The main airport is ${data.airport}.\n`
+        }
+        console.log(message)
     })
     .catch(error => console.error(error));
