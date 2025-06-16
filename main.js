@@ -23,25 +23,32 @@ Testa la funzione con la query "london"
 */
 
 const getDashboardData = async (query) => {
+    // using promise all to save in an array the responses of the api
     const [destinationRes, weatherRes, airportRes] = await Promise.all([
         fetch(`http://localhost:3333/destinations?search=${query}`),
         fetch(`http://localhost:3333/weathers?search=${query}`),
         fetch(`http://localhost:3333/airports?search=${query}`),
     ])
-
+    // parsing the responses in json using a promise all
     const [destinationData, weatherData, airportData] = await Promise.all([
         destinationRes.json(),
         weatherRes.json(),
         airportRes.json(),
     ])
-
+    //creating object of destination weather and airport 
+    const destination = destinationData[0]
+    const weather = weatherData[0]
+    const airport = airportData[0]
+    //creating final object with the info required
     return {
-        destination: destinationData,
-        weather: weatherData,
-        airport: airportData,
+        city: destination.name,
+        country: destination.country,
+        temperature: weather.temperature,
+        weather: weather.weather_description,
+        airport: airport.name,
     }
 }
-
+//use example
 getDashboardData('london')
     .then(data => {
         console.log('Dasboard data:', data);
